@@ -11,12 +11,14 @@ class Menu:
         self.current_option = 0
         self.current_menu = 0
         self.difficulty = "easy"
+        #menu options
         self.options = [["Play", "Settings", "Exit"], 
                         ["Back", "Difficulty"], 
                         ["Back", "Easy", "Medium", "Hard"]]
         self.main_menu()
     
     def main_menu(self):
+        """Present the current menu to the user."""
         while self.running:
             self.window.fill((255, 255, 255))
             self.draw_menu(self.current_menu)
@@ -27,6 +29,7 @@ class Menu:
         self.running = False
 
     def draw_menu(self, menu):
+        """Draw the menu options on the screen."""
         for i, option in enumerate(self.options[menu]):
             if i == self.current_option:
                 text = self.font.render(option, True, (0, 0, 0))
@@ -37,6 +40,7 @@ class Menu:
         pygame.display.flip()
             
     def handle_events(self):
+        """Handle key events for the menu."""
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
