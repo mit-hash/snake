@@ -4,18 +4,68 @@ import sys
 import time
 
 SNAKE_SIZE = 10
-# Initialize Pygame
-pygame.init()
-# Set up display
 WIDTH, HEIGHT = 600, 400
-WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Snake Game")
-# Set up colors
+
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
-# Set up game variables
+
+class Game:
+    def __init__(self):
+        pygame.init()
+        self.snake = Snake()
+        self.apple = Apple()
+        self.score = 0
+        self.clock = pygame.time.Clock()
+        self.running = True
+        self.main_loop()
+        self.window = pygame.display.set_mode((WIDTH, HEIGHT))
+    
+    def event_handler(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP and self.snake.direction != "DOWN":
+                    self.snake.direction = "UP"
+                elif event.key == pygame.K_DOWN and self.snake.direction != "UP":
+                    self.snake.direction = "DOWN"
+                elif event.key == pygame.K_LEFT and self.snake.direction != "RIGHT":
+                    self.snake.direction = "LEFT"
+                elif event.key == pygame.K_RIGHT and self.snake.direction != "LEFT":
+                    self.snake.direction = "RIGHT"
+                elif event.key == pygame.K_ESCAPE:
+                    self.running = False
+                
+    def draw_window(self):
+        self.window.fill(WHITE)
+        for segment in self.snake.body:
+            pygame.draw.rect(self.window, GREEN, (segment[0], segment[1], SNAKE_SIZE, SNAKE_SIZE))
+        self.apple.draw(self.window)
+        self.update_score()
+        pygame.display.flip()
+
+    def check_apple_collision(self):
+        if self.snake.body[0] == self.apple.position[0]:
+            self.snake.grow = True
+            self.apple.spawn()
+            self.score += 1
+            self.update_score()
+
+    def update_score(self):
+        font = pygame.font.SysFont("Arial", 25)
+        score_text = font.render(f"Score: {self.score}", True, WHITE)
+        self.window.blit(score_text, (10, 10))
+
+    def game_over(self):
+        print("Game Over!")
+        pygame.quit()
+        sys.exit()
+
+    def main_loop(self):
+        pass
+    
 
 class Snake:
     def __init__(self):
@@ -42,12 +92,12 @@ class Snake:
             self.body.pop()
         self.check_boundaries()
         self.check_self_collision()
-        self.check_apple_collision()
+        #self.check_apple_collision()
 
     def check_boundaries(self):
         head_x, head_y = self.body[0]
         if head_x < 0 or head_x >= WIDTH or head_y < 0 or head_y >= HEIGHT:
-            self.game_over()
+            game_over()
         if head_x < 0:
             head_x = WIDTH - SNAKE_SIZE
         elif head_x >= WIDTH:
@@ -57,23 +107,33 @@ class Snake:
         elif head_y >= HEIGHT:
             head_y = 0
         self.body[0] = (head_x, head_y)
-        if head_x < 0:
-            head_x = WIDTH - SNAKE_SIZE
-    
+
     def check_self_collision(self):
         head = self.body[0]
         if head in self.body[1:]:
-            self.game_over()
+            game_over()
 
-    def check_apple_collision(self):
-        if self.body[0] == apple.position:
-            self.grow = True
-            apple.spawn()
-            self.score += 1
-            self.update_score()
 
-    def game_over(self):
-        print("Game Over!")
-        pygame.quit()
-        sys.exit()
+class Apple:
+    def __init__(self):
+        self.position = []
+        self.spawn()
 
+    def spawn(self):
+        x = random.randint(0, (WIDTH - SNAKE_SIZE) // SNAKE_SIZE) * SNAKE_SIZE
+        y = random.randint(0, (HEIGHT - SNAKE_SIZE) // SNAKE_SIZE) * SNAKE_SIZE
+        self.position.append((x, y)) 
+
+    def draw(self, window):
+        pygame.draw.rect(window, RED, (self.position[0][0], self.position[0][1], 1, 1))
+
+
+if __name__ == "__main__":
+    game = Game()
+    while game.running:
+        game.event_handler()
+        game.snake.move()
+        game.draw_window()
+        game.check_apple_collision()
+        game.clock.tick(15)
+    pygame.quit()
