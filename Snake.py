@@ -11,6 +11,7 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
+BLUE = (0, 0, 255)
 
 DIFFICULTY = {
     "easy": 10,
@@ -23,8 +24,9 @@ class Game:
         self.width = width
         self.height = height
         pygame.init()
-        
+
         self.snake = Snake()
+        self.enemy = Snake()
         self.apple = Apple(amount=3)
         self.score = 0
         self.clock = pygame.time.Clock()
@@ -58,6 +60,8 @@ class Game:
         self.window.fill(WHITE)
         for segment in self.snake.body:
             pygame.draw.rect(self.window, GREEN, (segment[0], segment[1], SNAKE_SIZE, SNAKE_SIZE))
+        for segment in self.enemy.body:
+            pygame.draw.rect(self.window, BLUE, (segment[0], segment[1], SNAKE_SIZE, SNAKE_SIZE))
         self.apple.draw(self.window)
         self.update_score()
         pygame.display.flip()
@@ -70,6 +74,11 @@ class Game:
                 self.apple.spawn()
                 self.score += 1
                 self.update_score()
+
+    def check_enemy_collision(self):            
+        for segment in self.enemy.body:
+            if self.snake.body[0] == segment:
+                Game.game_over()
 
     def update_score(self):
         font = pygame.font.SysFont("Arial", 25)
@@ -87,6 +96,7 @@ class Game:
             self.snake.move()
             self.draw_window()
             self.check_apple_collision()
+            self.check_enemy_collision()
             self.clock.tick(self.difficulty_speed)
     
 
