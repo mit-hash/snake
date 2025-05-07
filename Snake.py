@@ -12,6 +12,12 @@ BLACK = (0, 0, 0)
 GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
+DIFFICULTY = {
+    "easy": 10,
+    "medium": 15,
+    "hard": 20
+}
+
 class Game:
     def __init__(self, width=WIDTH, height=HEIGHT):
         self.width = width
