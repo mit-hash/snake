@@ -23,13 +23,19 @@ class Game:
         self.width = width
         self.height = height
         pygame.init()
+        
         self.snake = Snake()
         self.apple = Apple(amount=3)
         self.score = 0
         self.clock = pygame.time.Clock()
         self.running = True
         self.window = pygame.display.set_mode((self.width, self.height))
+
         self.menu = Menu.Menu(self.window)
+
+        self.difficulty = self.menu.difficulty
+        self.difficulty_speed = DIFFICULTY[self.difficulty]
+
         self.main_loop()
     
     def event_handler(self):
@@ -81,7 +87,7 @@ class Game:
             self.snake.move()
             self.draw_window()
             self.check_apple_collision()
-            self.clock.tick(15)
+            self.clock.tick(self.difficulty_speed)
     
 
 class Snake:
