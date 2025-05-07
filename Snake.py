@@ -19,8 +19,8 @@ class Game:
         self.score = 0
         self.clock = pygame.time.Clock()
         self.running = True
-        self.main_loop()
         self.window = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.main_loop()
     
     def event_handler(self):
         for event in pygame.event.get():
@@ -58,13 +58,18 @@ class Game:
         score_text = font.render(f"Score: {self.score}", True, WHITE)
         self.window.blit(score_text, (10, 10))
 
-    def game_over(self):
+    def game_over():
         print("Game Over!")
         pygame.quit()
         sys.exit()
 
     def main_loop(self):
-        pass
+        while self.running:
+            self.event_handler()
+            self.snake.move()
+            self.draw_window()
+            self.check_apple_collision()
+            self.clock.tick(15)
     
 
 class Snake:
@@ -97,7 +102,7 @@ class Snake:
     def check_boundaries(self):
         head_x, head_y = self.body[0]
         if head_x < 0 or head_x >= WIDTH or head_y < 0 or head_y >= HEIGHT:
-            game_over()
+            Game.game_over()
         if head_x < 0:
             head_x = WIDTH - SNAKE_SIZE
         elif head_x >= WIDTH:
@@ -111,7 +116,7 @@ class Snake:
     def check_self_collision(self):
         head = self.body[0]
         if head in self.body[1:]:
-            game_over()
+            Game.game_over()
 
 
 class Apple:
@@ -125,15 +130,11 @@ class Apple:
         self.position.append((x, y)) 
 
     def draw(self, window):
-        pygame.draw.rect(window, RED, (self.position[0][0], self.position[0][1], 1, 1))
+        for apple in self.position:
+            pygame.draw.rect(window, RED, (apple[0], apple[1], SNAKE_SIZE, SNAKE_SIZE))
+        
 
 
 if __name__ == "__main__":
     game = Game()
-    while game.running:
-        game.event_handler()
-        game.snake.move()
-        game.draw_window()
-        game.check_apple_collision()
-        game.clock.tick(15)
     pygame.quit()
