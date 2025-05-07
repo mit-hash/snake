@@ -26,7 +26,7 @@ class Game:
         pygame.init()
 
         self.snake = Snake()
-        self.enemy = Snake()
+        self.enemy = EnemySnake()
         self.apple = Apple(amount=3)
         self.score = 0
         self.clock = pygame.time.Clock()
@@ -68,12 +68,13 @@ class Game:
 
     def check_apple_collision(self):
         for apple in self.apple.position:
-            if self.snake.body[0] == apple:
-                self.snake.grow = True
+            if self.snake.body[0] == apple or self.enemy.body[0] == apple:
                 self.apple.position.remove(apple)
                 self.apple.spawn()
-                self.score += 1
-                self.update_score()
+                if self.snake.body[0] == apple:
+                    self.snake.grow = True
+                    self.score += 1
+                    self.update_score()
 
     def check_enemy_collision(self):            
         for segment in self.enemy.body:
@@ -94,6 +95,7 @@ class Game:
         while self.running:
             self.event_handler()
             self.snake.move()
+            self.enemy.move(apples=self.apple.position)
             self.draw_window()
             self.check_apple_collision()
             self.check_enemy_collision()
@@ -101,8 +103,8 @@ class Game:
     
 
 class Snake:
-    def __init__(self):
-        self.body = [(100, 100), (90, 100), (80, 100)]
+    def __init__(self, body=[(100, 100), (90, 100), (80, 100)]):
+        self.body = body
         self.direction = "RIGHT"
         self.grow = False
         
@@ -145,6 +147,39 @@ class Snake:
         head = self.body[0]
         if head in self.body[1:]:
             Game.game_over()
+
+class EnemySnake(Snake):
+    def __init__(self):
+        super().__init__(body=[(500, 300), (510, 300), (520, 300)])
+        self.direction = "LEFT"
+
+    def find_direction(self):
+        pass
+
+    def find_closest_apple(self, apples):
+        closest_apple = None
+        min_distance = float('inf')
+        for apple in apples:
+            distance = ((self.body[0][0] - apple[0]) ** 2 + (self.body[0][1] - apple[1]) ** 2) ** 0.5
+            if distance < min_distance:
+                min_distance = distance
+                closest_apple = apple
+        return closest_apple
+    
+    def move(self, apples):
+        closest_apple = self.find_closest_apple(apples)
+        self.move_towards(closest_apple)
+
+    def move_towards(self, target):
+        head_x, head_y = self.body[0]
+        target_x, target_y = target
+
+        if abs(target_x - head_x) > abs(target_y - head_y):
+            self.direction = "RIGHT" if target_x > head_x else "LEFT"
+        else:
+            self.direction = "DOWN" if target_y > head_y else "UP"
+
+        super().move()
 
 
 class Apple:
