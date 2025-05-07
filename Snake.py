@@ -2,6 +2,7 @@ import pygame
 import random
 import sys
 import time
+import Menu
 
 SNAKE_SIZE = 10
 WIDTH, HEIGHT = 600, 400
@@ -12,14 +13,17 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
 class Game:
-    def __init__(self):
+    def __init__(self, width=WIDTH, height=HEIGHT):
+        self.width = width
+        self.height = height
         pygame.init()
         self.snake = Snake()
-        self.apple = Apple()
+        self.apple = Apple(amount=3)
         self.score = 0
         self.clock = pygame.time.Clock()
         self.running = True
-        self.window = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.window = pygame.display.set_mode((self.width, self.height))
+        self.menu = Menu.Menu(self.window)
         self.main_loop()
     
     def event_handler(self):
@@ -47,15 +51,17 @@ class Game:
         pygame.display.flip()
 
     def check_apple_collision(self):
-        if self.snake.body[0] == self.apple.position[0]:
-            self.snake.grow = True
-            self.apple.spawn()
-            self.score += 1
-            self.update_score()
+        for apple in self.apple.position:
+            if self.snake.body[0] == apple:
+                self.snake.grow = True
+                self.apple.position.remove(apple)
+                self.apple.spawn()
+                self.score += 1
+                self.update_score()
 
     def update_score(self):
         font = pygame.font.SysFont("Arial", 25)
-        score_text = font.render(f"Score: {self.score}", True, WHITE)
+        score_text = font.render(f"Score: {self.score}", True, BLACK)
         self.window.blit(score_text, (10, 10))
 
     def game_over():
@@ -77,7 +83,7 @@ class Snake:
         self.body = [(100, 100), (90, 100), (80, 100)]
         self.direction = "RIGHT"
         self.grow = False
-
+        
     def move(self):
         head_x, head_y = self.body[0]
         if self.direction == "UP":
@@ -120,9 +126,10 @@ class Snake:
 
 
 class Apple:
-    def __init__(self):
+    def __init__(self,amount):
         self.position = []
-        self.spawn()
+        for _ in range(amount):
+            self.spawn()
 
     def spawn(self):
         x = random.randint(0, (WIDTH - SNAKE_SIZE) // SNAKE_SIZE) * SNAKE_SIZE
@@ -133,7 +140,6 @@ class Apple:
         for apple in self.position:
             pygame.draw.rect(window, RED, (apple[0], apple[1], SNAKE_SIZE, SNAKE_SIZE))
         
-
 
 if __name__ == "__main__":
     game = Game()
